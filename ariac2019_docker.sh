@@ -1,7 +1,7 @@
 #!/bin/bash
 
-DOCKER_IMG="sumanthnirmal/ros-melodic-gazebo9:ariac2019"
-DOCKER_CONATINER_NAME="ariac2019_docker_container"
+DOCKER_IMG="stblacq/ros_melodic_mesh_navigation:v1.0"
+DOCKER_CONATINER_NAME="ros_melodic_mesh_navigation"
 HOME_DIRECTORY="/home/$USER/ariac2019_home"
 
 docker_start() {
@@ -29,6 +29,7 @@ docker_start() {
         -v "/tmp/.X11-unix:/tmp/.X11-unix:rw" \
         -v /home/$USER/ariac2019_home:/home/developer/ \
         -v "/home/$USER/.ssh:/home/developer/.ssh" \
+        -v "/home/$USER/dev_workspace:/home/developer/workspace" \
         -e DISPLAY=$DISPLAY  \
         -e QT_X11_NO_MITSHM=1 \
         -e XAUTHORITY=$XAUTH \
@@ -69,6 +70,13 @@ docker_stop() {
   docker stop -t 0 $DOCKER_CONATINER_NAME
 }
 
+docker_commit_and_push() {
+
+  docker commit $DOCKER_CONATINER_NAME $DOCKER_IMG
+
+  docker push $DOCKER_IMG
+}
+
 if [ "$1" = "start" ]; then
   # if container is already Running
   if docker ps --format '{{.Names}}' | grep -q $DOCKER_CONATINER_NAME; then
@@ -93,6 +101,9 @@ then
 elif [ "$1" = "stop" ]
 then
   docker_stop
+elif [ "$1" = "commit_and_push" ]
+then
+  docker_commit_and_push
 else
   echo "Options:
   --help     Show this message and exit.
